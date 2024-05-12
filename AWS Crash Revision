@@ -1,0 +1,966 @@
+* Regions and AZs
+
+* EC2
+	- Security Group
+	- Elastic IP
+	- Bootstrapping with Userdata
+	- Launch Template
+	- AMI
+	
+* Load Balancer & Auto Scaling Group
+	- Classic Load Balancer
+	- Application Load Balancer
+		. Listener
+		. Target Group
+		. Deregistration Delay
+		. Autoscaling Group
+	- Network Load Balancer
+	
+* ServerLess
+	- Reserved Concurrency
+	- Execution Context
+	- Provisioned Concurrency
+	- Lambda Edge
+	- Versioning
+	- Alias
+	- Layers
+	
+* API Gateway
+	- Why Points
+		. Ways for authentication and authorization
+		. To set limits (rate limiting, quotas) for API Consumers
+		. To implement multiple versions of API
+		. To implement monitoring, caching and a lot of features
+	- Rest API
+	- HTTP API
+	- WebSockets API
+	- Custom Integration [Method Request -> Integration Request , Method Response -> Integration Response]
+	- Proxy Integration
+	- Endpoint Types 
+		. Edge Optimized (Default)
+		. Regional
+		. Private
+	- Deployment Stages
+	- Caching
+	- Authorization
+		. Open
+		. IAM Permissions
+		. Amazon Cognito Authorizer
+		. Lambda Authorizer		
+	
+* Amazon Cognito
+	- Why Points
+		. Authenticate users with external authentication system and provide access to cloud resources
+	- Corporate Identity Federation [SAML]
+	- Web Identity Federation [OpenID]
+	- User Pools
+	- Identity Pools
+
+* Amazon S3
+	- Objects and Buckets
+	- S3 Versioning
+	- Static Website Hosting
+	- Resource Based Policies [Bucket Policies]
+	- Tags
+	- S3 Event Notifications
+	- Bucket ACLs and Object ACLs
+		. Bucket ACLs 
+			1. Access for bucket/object owners
+			2. Access for other AWS Accounts
+			3. Public Access
+		. Object ACLs
+			1. When bucket owner is not the object owner
+			2. When you need different permissions for different objects in the same bucket.
+	- S3 Storage Classic
+		. Standard
+		. Standard IA
+		. One Zone IA
+		. Intelligent-Tiering
+		. Glacier
+		. Glacier Deep Archive
+	- S3 Lifecycle Configuration
+	- S3 Consistency
+		. READ AFTER WRITE FOR PUTS [When you create a new object, it is immediately available]
+		. Eventual Consistency for Overwrites PUTS and DELETES [For Object Update, you might get a previous version of object, but for a small time]
+	- S3 Presigned URL
+
+* IAM
+	- AWS Identity and Access Management (IAM)
+		. Authentication
+		. Authorization
+		. Identities
+			1. AWS Users
+			2. Federated Users
+	- AWS IAM Policies - Authorization
+	- Instance Profile
+	- Cross Account Access
+		. PROD Account
+			1. Create IAM Role (ProdS3AccessRole) with right permissions and enable trust relationships with DEV Account
+		. DEV Account
+			2. Grant appropriate users the permissions to assume the ProdS3AccessRole in PROD Account.
+				` Create a customer managed policy ProdS3AccessPolicy allowing access to call STS AssumeRoleAPI for ProdS3AccessRole and attach this policy to user 
+				  or group.
+		[ Background ]
+			3. Call is made to AWS Security Token Service (AWS STS) AssumeRoleAPI for the prodAccessRole
+			
+		In JD Case, we first do the federated authentication and assume appropriate role to access the resources.
+	- Corporate Identity Federation
+	- Web Identity Federation
+	- Identity based and resource based policies
+
+* Data Encryption, KMS and CloudHSM
+	- Symmetric Key Encryption
+		. Same key is used for encryption and decryption
+	- Assymetric Key Encryption
+		. Public Key is used for encryption
+		. Private Key is used for decryption
+	- AWS KMS 
+	- Server Side Encryption with KMS
+		. Data sent to S3
+		. S3 receives data from KMS
+			1. In KMS, we have CMK
+			2. Plain text data key and encrypted data key are stored there
+			3. S3 gets back both the keys
+		. S3 encrypts data
+			1. S3 takes the data and plain text data key along with the encryption algorithm and stores encrypted data key with encrypted object.
+			2. Removes plain text data key.
+		. Stores encrypted data and data key
+		. Encryption of data key is done in KMS
+		. Encryption of data is done in the respective service.
+	- Envelope Encryption
+		. Master Key -> encrypts -> Data Key -> encrypts -> Data
+	- Customer Master Keys
+		. Customer Managed
+		. AWS Managed
+		. AWS Owned
+	- Decryption of data using KMS
+		. Service sends encrypted data key to KMS
+		. KMS uses CMK to decrypt and return plain text data key
+		. Service uses plain text data key to perform the decryption.
+	- KMS With Cloudwatch
+		. Logs can be encrypted.
+	- CloudHSM
+		. AWS KMS can use CloudHSM cluster as custom key store to store the keys but be ultra careful as AWS can't get your keys back if lost.
+	- Server Side Encryption
+		. SSE - S3
+		. SSE - KMS
+		. SSE - C
+	- Client Side Encryption
+	
+* Networking
+	- Need for AWS VPC
+		. Can anyone on the internet see the data exchange between the application and the database ?
+		. Can anyone from the internet directly connect to your database ?
+	- Amazon VPC
+		. Your own isolated network in VPC Cloud
+		. You control all the traffic coming in and going out of a VPC
+	- Need for VPC Subnets
+		. Private resources should not be accessed publicly
+	- VPC Subnets
+		. Resources in public subnet can talk to internet
+		. Resources in private subnet can't talk to internet
+		. Resources in public subnet can talk to resources in private subnet
+		. VPC is created in a region.
+		. Subnet is created in AZs
+	- Route Table
+		. Each route table consists of set of rules called routes
+		. Each route or routing rule has a destination and a target.
+		. What range of address should be routed to which target resources.
+	- Public Subent and Private Subnet
+	- Network Address Translation Gateway
+		. To allow instances in a private subnet to download software updates and security patches while denying inbound traffic from internet.
+	- Network Access Control List
+		. Security Group controls traffic to a specific resource in a subnet but it stops the traffic even from entering the subnet.
+		. NACL provides stateless firewall at subnet level.
+		. Each subnet must be associated with a NACL
+		. Default NACL allows all inbound and outbound traffic.
+		. Custom NACL denys all inbound and outbound traffic.
+		. Rules have a priority number.
+			Lower Number -> Higher Priority.
+	- VPC Flow Logs
+	- VPC Peering [Connecting VPCs belonging to same or different account]
+		. AWS Managed VPN
+		. AWS Direct Connect
+	- VPC Endpoint
+		. Securely connect your VPC to another service.
+		. Gateway endpoint [S3 and DynamoDB]
+		. Interface Endpoint  ![S3 and DynamoDB]
+		. Traffic doesn't go through internet.
+		
+* Database Fundamentals
+	- Challenges
+		. CH1 : Your database will go down if the data centre crashes or the server storage fails
+		. CH2 : You will lose data if the database crashes
+	- Solution 1 [Snapshot]
+		. CH1 : Your database will go down if the data centre crashes
+		. CH2 : You will lose data if the database crashes [Partly solved]
+			> You can setup database from latest snapshot but you can lose data for an hour depending upon the time snapshot is created.
+		. CH3 : Database will be slow if you take the snapshots.
+	- Solution 2 [Transaction Logs]
+		. CH1 : Your database will go down if the data centre crashes
+		. CH2 : You will lose data if the database crashes [Solved]
+			> Setup database from snapshot and apply transaction logs
+		. CH3 : Database will be slow when you take the snapshots.
+	- Solution 3 : [Standby]
+		. CH1 : Your database will go down if the data centre crashes [Solved]
+			> You can switch to standby database
+		. CH2 : You will lose data if the database crashes [Solved]
+		. CH3 : Database will be slow when you take the snapshots
+			> Take snapshots from standby
+	- Availability
+		. Will I be able to access the data now or when I need it.
+		. Percentage of time an application provides the operation expected of it
+		. Can create standy to increase this.
+	- Durability
+		. Will my data be available after 10 or 100 or 1000 yrs.
+		. Can create replicas, snapshots and backup to increase this.
+	- RTO and RPO
+		. RPO - Recovery Point Objective : Maximum acceptable period of data loss - Durability
+		. RTO - Recovery Time Objective  : Maximum acceptable downtime			  - Availability
+		. Achieving minimum RPO and RTO is expensive.
+	- Read Replicas and Standbys
+		. Asynchronous Replication [Read replicas]
+		. Synchronous Replication  [Standby]
+	- Consistency
+		. Strong Consistency
+		. Read after Write Consistency
+		. Eventual Consistency
+	- Database Categories
+		. Relational [AWS Aurora, MYSQL, POSTGRES]
+			> OLAP - For analytics
+			> OLTP - For Transactional
+		. NoSQL Database [DynamoDB]
+		. GraphQL    [Neptune]
+		. In-Memory  [Redis and Memchached]
+		
+* Amazon RDS
+	- Features
+		. Multi-AZ Deployment
+		. Read Replicas
+		. Storage autoscaling
+		. Automated backups
+		. Manual snapshots
+	- Multi AZ Deployment
+		. Standby created in different AZ
+		. Synchronous replication
+		. Makes maintenance easy
+			> Perform maintenance on standy
+			> Promote standby to primary
+			> Perform maintenance on primary [old]
+		. Not allowed to connect to standby database directly
+		. Automatic failover to standby if master has problems
+	- Read Replicas
+		. Asynchronous Replication
+	- Scaling
+		. Horizontal Scaling : Creating read replicas
+		. Vertical scaling   : Updating instance size and disk
+	- Operation
+	- Security and Encryption
+	- When to use 
+		. Pre-defined schema
+		. Strong transactional capabilities
+		. Complex Queries
+	- When not to use
+		. You need highly scalable read and write operations - millions of reads and writes [DynamoDB]
+		. You want to upload files using REST APIs
+
+* Amazon DynamoDB
+	- Features
+		. Fast, scalable, distributed
+		. Flexible, NoSQL Key-Value and document database
+		. Single digit millisecond responses for millions of TPS
+		. No need to worry about scaling, availability and durability
+		. Provides an expensive serverless mode
+	- DynamoDB Tables
+	- Data Types
+	- Primary Key
+		. Partition Key
+		. Partition Key + Sort Key
+	- Secondary Index - LSI
+		. Same partition key as primary key but different sort key
+		. Defined at table creation [Modification not allowed]
+	- Secondary Index - GSI
+		. Partition Key and Sort Key can be different from primary key
+		. Can be added, modified and removed later
+	- Consistency Level
+		. Eventual Consistency [Default]
+		. Strongly Consistency [Need to set  consistentRead = true]
+	- Read/Write Capacity Modes
+		. Provisioned
+		. On Demand
+	- Query vs Scan
+		. Query - Search using partition key and sort keys [filters]
+		. Scan  - Search all the details in the table
+	- Projection and Filter Expressions
+	- Pagination
+	- Conditional Expressions
+	- DynamoDB API errors
+	- TTL 
+		. Mark specific attributes in a table as TTL attribute (should use timestamp format)
+		. Item deleted if the TTL attribute value is older than the current time
+	- Optimistic Locking
+	- IAM accesses
+	- Streams
+		. Streams capture time ordered sequence of item modification [24 hrs]
+		. If enabled, it'll create stream on create, delete or updates
+		. Streamviewtype decieds what is captured on the stream type [KEYS_ONLY, NEW_IMAGE, OLD_IMAGE, NEW_AND_OLD_IAMGES]
+		. A different endpoint is created for streams
+	- Records and Shards
+		. Record : Each time sequence single data
+		. Shard  : Group of records [It is ephermal]
+	- Operation
+	- IAM and Encryption
+	- DynamoDB Accelerator (DAX)
+		. In memory caching for dynamoDB
+		. Uses write-through [cache and database updated simultaneously]
+		
+* Decoupling Applications with SNS, SQS and MQ
+	- Asynchronous Communications help us decouple the architecture.
+	- Asynchronous Communication - Pull Model [SQS]
+		. Producers and Consumers are independent.
+		. Scalability
+		. Availability
+		. Reliability
+		. Decoupling
+	- Asynchronous Model - Push Model [SNS]
+		. Subscribers subscribe to a topic and producers produce messages.
+		. Decoupling
+		. Availability
+	- SQS Types 
+		. Standard [Throughput]
+			> Unlimited throughput
+			> But no gurantee of ordering
+			> But no gurantee of exactly once processing
+		. FIFO [Order of events]
+			> First In First Out Delivery
+			> Exactly once processing
+			> But throughput is lower
+	- Sending and Receiving SQS Message
+		. Producer place message on queue [unique Id ABC]
+		. Consumer poll for messages [Receives ABC message with receipt handle XYZ]
+		. Message remain in the queue while the  consumer processes the message [Other consumer will not receive the message even if they poll for ABC]
+		. Consumer process the message successfully [Calls delete message XYZ and message is removed from the queue]
+	- SQS Auto Scaling
+		. Use Target Tracking Scaling Policy
+		. Use a SQS Metric like ApproximateNumberOfMessages
+	- SQS Security and IAM
+	- SQS Receive message	
+		. Message Body
+		. Message Id
+		. Receipt Handle
+		. Message Attributes
+		. Use Long Polling to reduce the no of API Calls
+	- SNS
+		. Pub Sub Paradigm
+		. Broadcast asynchronous event notifications
+	- MQ
+		. Managed message broker for Apache Active MQ
+
+* Handling Data Streams
+	- Characteristics of Streams
+		. Continuously generated
+		. Small pieces of data
+		. Sequenced - Mostly associated with time
+	- S3 Notifications
+	- DynamoDB Streams
+	- Amazon Kinesis
+		. Amazon Kinesis Data Streams
+			> Process Data Streams
+		. Amazon Kinesis Firehouse
+			> Data Ingestion for Streaming Data : S3 and  ElasticSearch
+		. Amazon Kinesis Analytics
+			> Run Queries against streaming  data
+		. Amazon Kinesis Video Streams
+			> Monitor Video Streams
+	- Resharding
+		. Shard Split
+		. Shard Merge
+
+* Content Delivery
+	- To deliver content to the global audience
+	- Cloudfront
+		. It tries to servet the content from the edge location
+		. If the content is not available at the edge location, it'll be fetched from origin server and cached
+		. It integrates with AWS Shield to protect from DDoS Attack
+		. It integrates with AWS WAF to protect from SQL Injection and cross site scripting
+	- Cloudfront Cache Behaviours
+		. Configure  different cloudfront behaviour for different url path pattern for same origin
+	- Private Content
+		. Signed URL
+			> Application downloads for individual files
+			> Situations where cookies are not supported
+		. Signed Cookies
+			> Multiple files
+			> Doesn't need any change in application urls
+		. Origin Access Identities
+			> Create a special Cloudfront user, which only can access S3.
+	- Cloudfront IAM
+
+* Routing
+	- Route 53
+		. Steps in setting up website and domain name
+		. Buy the domain name in28minutes.com (Domain Registrart)
+		. Setup Website Content (Website Hosting)
+		. Route requests to in28minutes.com to the my website host server (DNS)
+		. Domain Regsitrar + DNS
+		. Buy your domain name
+		. Setup your DNS Routing
+	- Route 53 Domain Name Server
+		. How should traffic be routed for in28minutes.com
+	- Route 53 Hosted Zone
+		. Container for records containing DNS Records routing traffic for a specifc domain
+		. It can be
+			> Public  : Routing over internet
+			> Private : Routing within VPCs
+	- Standard DNS Records
+		. A - Name to IPV4 address
+		. AAAA - Name to IPV6 address
+		. NS - Name Server Containing DNS Records 
+			> Create NS records on GoDaddy
+			> Redirect to Route 53 Name Servers
+		. MX - Mail Exchange
+		. CNAME - Name1 to Name2
+	- Route 53 Specific Extension - Alias Records
+		. Route traffic to selected AWS Resources.
+		. Alias records can be created for root and non root domains
+		. Comapared to CNAME records which can be created for non root domains only
+	- Routing [Across Regions]
+	- Routing Policies
+		. Simple 		- Maps a domain name to IP Addresses
+		. Weighted 		- Maps a single domain name to multiple resources [A - 10%, B - 20%, C - 30%]
+		. Latency 		- Choose the option with minimum latency out of all the available resources
+		. Failover 		- Active passive failover [Primary Health Check fails]
+		. GeoProximity 	- Choose the nearest resource from your user [Geographic distance]
+		. Multivalue 	- Return multiple healthy records
+		. Geolocation 	- Choose based on the location of the user
+	
+* EC2 Advanced
+	- Scalability
+		. Vertical Scaling 		- Increasing the instance size
+		. Horizontal Scaling 	- Increasing the number of instances
+	- Tenancy
+		. Shared [Default]
+			> Single host machine can have instances from multiple customers
+		. EC2 Dedicated Instances
+			> Virtualised instances on hardware dedicated to one customer
+			> You don't have the visibility in the hardware
+		. EC2 Dedicated Hosts
+			> Physical server dedicated to one customer
+			> You have visibility in the hardware of underlying host
+	- EC2 On Demand
+		. On demand resource provisioning [High cost and highest flexibility]
+	- EC2 Spot Instances
+		. [Old Model] Bid a price. Higher Bidder wins.
+		. [New Model] Quote your maximum price. Prices decided by long term trends
+		. Ideal for non-critical workloads that can tolerate interruptions.
+	- EC2 Reserved Instances
+		. Reserve EC2 ahead of time
+	- EC2 Placement Group
+		. Certain usecases need control over placement of a group of EC2 Instances
+			> Low latency network communication
+			> High Availability
+		. You don't want EC2 to decide this for you
+		. Types
+			> Cluster 	: low network latency
+			> Spread  	: Avoid simultaneous failures
+			> Partition : multiple partitions  with low network latency
+	- Elastic Network Interface
+		. Logical networking component that represents a virtual network card.
+		
+* Storage in Cloud
+	- Storage Types
+		. Block Storage : Hard Disk
+		. Type Storage  : A set of files you want to share with your colleagues
+	- Block Storage
+		. Typically one block storage can be connected to One Virtual Server
+		. You can connect multiple different block storage devices to one virtual server
+	- File Storage
+		. Media workflows need huge shared storage for supporting processes like video editing
+		. Enterprise users need a quick way to share files in a secure and organised way
+	- AWS Block Storage
+		. Amazon Elastic Block Store (EBS) [Network Storage]
+			> More Durable
+			> Lifecycle not attached to EC2 Instance
+			> Very flexible
+			> Independent of lifecycle of EC2 Instance
+		
+		. Instance Store [Physically attached to EC2 Instance]
+			> Temporary Data
+			> Lifecycle tied to EC2 Instance
+			> Ephermal Storage [Data lost when hardware fails or an instance is terminated]
+			> Only some of the EC2 Instances support this.
+			> Advantages :
+				` Very fast
+				` No Extra Cost, Cost is included in the cost of EC2 Instance
+				` Ideal for storing temporary information
+			> Disadvantages
+				` Slow bootup time
+				` Ephermal Storage
+				` Can't take a snapshot or restore from storage
+		
+	- AWS File Storage
+		. Amazon EFS
+		. Amazon FSx for Windows File Server
+		. Amazon FSx for Lustre
+	
+	- Amazon EFS
+		. Petabyte scale, pay for use, Auto Scaling
+		. Compatible with Amazon EC2-linux based instances
+		
+	- Amazon Storage Gateway
+		. Hybrid Storage (OnPremise [Software] + Cloud)
+		. Unlimited Cloud Storage  for on-premise software applications and users with good performance.
+		. Storage Gateway and S3 Glacier encrypt data by default.
+		. Three Options
+			> AWS Storage File Gateway 		- Avoid large on premise file share
+			> AWS Storage Tape Gatway  		- Avoid physical tape backups
+			> AWS Storage Volume Gateway	- Move block storage to cloud	
+			
+* AWS ElasticBeanStalk
+	- Features :
+		. Simplest way to deploy and scale your web applications in AWS
+		. Supports multiple programming languages, application servers and docker containers
+		. No Charges [Pay what you provision]
+		. Automatic Load Balancing
+		. Auto Scaling
+		. Managed Platform updates
+		. Application Health Monitoring
+	- Concepts
+		. Application 			- A container for environments, versions and configuration
+		. Application Version 	- A specific version of deployable code
+		. Environment 			- An application version deployed to AWS Resources. You can have different environments with different application versions.
+		. Environment Tier
+			> Worker Tier     : Handling background tasks, such as processing job queues, asynchronous tasks, batch jobs and performing heavy computational tasks.
+			> Web Server Tier : Handling client requests and service web contents.
+		. Web Server Environments
+			> Singe Instance Environments : EC2 + Elastic IP
+			> Load Balanced Envrionments : ELB + ASG + EC2
+		. Source Bundles
+		. Configuration Files
+		. Deployment Methods [Move from V1 to V2]
+			> All at Once 					: Deploy V2 to all existing instances in a single batch
+			> Rolling 						: Deploy V2 to existing instances in multiple batches. Deployement of next batch starts after current batch is successful.
+			> Rolling with additional batch : Initially new batches are created and deployed and thereafter same as rolling.
+			> Immutable 					: New and Old version serve traffic until all V2 instances pass traffic.
+			> Traffic Splitting 			: Canary Testing Approach. Send a portion of traffic to V2.
+			> Blue Green with SWAP URL 		: Create new  environment with  V2 instances. Test them. SWAP URL of V1 environment with V2 environment.
+
+* Containers and Containers Orchestration	
+	- Features
+		. Enterprises are heading towards microservices architecture.
+		. Build small focussed service.
+		. Flexibility to build applications in different programming languages
+		. To ease deployment
+	- Docker
+		. Create docker image for each microservice.
+		. Docker images contain everything a microservice needs to run :
+			> Application runtime
+			> Application code
+			> Dependencies
+		. You can run these docker containers in the same way on any infrastructure [Your computer, Corporate data centre, cloud]
+	- Docker Advantages
+		. Docker containers are light weight
+		. It provides isolation from other containers.
+		. It is cloud neutral.
+	- Container Orchestration
+		. Auto Scaling
+		. Service Discovery
+		. Load Balancer
+		. Self Healing
+		. Zero downtime deployements
+	- Container Orchestration Options
+		. Cloud Netural
+			> Kubernetes
+			> AWS Service - AWS Elastic Kubernetes Service
+			> EKS doesn't have a free tier.
+		. AWS Specific
+			> AWS Elastic Container Service (ECS)
+			> AWS Fargate : Serverless version of ECS
+			> AWS Fargate doesn't have a free tier
+	- AWS ECS
+		. Fully Managed Service for container orchestration
+		. Serverless option - Fargate
+	- ECS Cluster
+		. Cluster 
+			> Group of one or more EC2 instances
+			> AWS Fargate = serverless. Don't worry about EC2 Instances
+		. Cluster Instance
+			> EC2 Instance + Container Agent
+			> Use ECS Ready AMIs
+			> Communicates with the ECS Cluster
+			> Use On-Demand Instances or Spot Instances
+		. AWS Fargate doesn't give you visibility into the EC2 Instances in the cluster
+	- ECS Task Definition
+		. Which docker images is used to create your containers ?
+		. CPU and Memory at task or container level
+		. Launch Type - [ECS or Fargate]
+		. Logging Configuration
+		. Data volumes attached to containers
+		. Task Permissions
+			> Task IAM  Role
+				` Define an IAM Role to use in your task definition.
+				` Specific permissions for your task/application
+			> Task Execution IAM Role
+				` Provide Amazon ECS Container and Fargate agents access to :
+					. Pull container images from ECR
+					. Publish container logs to cloudwatch
+	- Amazon ECS - Service
+		. Maintain specified number of tasks
+		. Deployment type
+			> Rolling update
+			> Blue Green Deployment
+		. Task Placement
+		. Task Autoscaling
+	- ECS Task Placement [Identify the instances that satisfy]
+		. CPU , memory and port requirements from task definition
+		. Task placement constraints
+		. Task placement strategies
+	- Amazon ECS [Strategy Types]
+		. binpack - Leave least amount of unused memory
+		. random  - Random task placement
+		. spread  - Spread evenly based on the specified values
+	- Task Placement Constraints
+		. distinctInstance - Place each task on a different container Instance
+		. memberOf         - Place tasks on container instances
+			> Use cluster query language to group objects and define constraints
+				` attribute:ecs.instance-type == t2.micro
+				` attribute:ecs.availability-zone in [us-east-1c, us-east-1d]
+				` ec2InstanceId in ['i-abcd1234','i-wxyx7890']
+	- ECS with Load Balancer
+		. Load Balancing performed using Application Load Balancers
+		. Two Features of ALB are important for ECS 
+			> Dynamic Host Port Mapping : Multiple tasks from the same service are allowed per EC2 Instance
+			> Path Based Routing        : Multiple services can use the same listener port on same ALB and routed based on path
+	- ElasticBeanStalk
+		. Use Images from docker repositories or build container images during deployments.
+	- Amazon ECR
+	
+* Devops
+	- Business Development Operations
+	- Getting Better at three elements of greate software teams
+		. Communication - Get teams together
+		. Feedback      - Earlier you find a problem, earlier you find a fix
+		. Automation    - Automate testing , infrastructure provisioning, deployement and monitoring
+	- CI/CD
+		. Continuous Integration - Continuously run your tests and packaging
+		. Continuous Deployement - Continuously deploy to test environments
+		. Continuous Delivery    - Continuous Delivery
+	- CI/CD Tools
+		. AWS Codecommit
+		. AWS Codepipeline
+		. AWS CodeBuild
+		. AWS CodeDeploy
+	- Infrastructure as Code [CloudFormation]
+	- AWS CodeCommit [Version Control Hosted by AWS]
+	- AWS CodeBuild [Fully Managed Build Services in AWS]
+		. Buildspec
+			> Collection of build commands and related settings
+			> buildspec.yml at root of source directory
+			> Major Elements
+				` Env - Information about environment variables
+				` Phases - Build is divided into pre-defined  phases
+					. Install PreBuild Build PostBuild
+				` Artifacts - Build output files (uploaded to S3 after build)
+	- AWS Code Deploy
+		. Automate applicatio deployements to 
+			> Amazon EC2 Instances
+			> On Premises Instances
+			> Serverless lambda functions
+			> Amazon ECS Service
+		. Important features
+			> Autoscaling
+			> Integrates with Codepipeline
+			> Automated rollbacks
+	- AWS CodeDeploy Deployments
+	
+* AWS CloudFormation 
+	- Features
+		. Automate deployment of AWS Resources in a controlled and predictable way.
+		. Avoid mistakes with manual configuration
+		. Think of it as version control for environments.
+		. All defined in simple text file - JSON or YAML
+		. It understands dependencies.
+		. Automatic rollbacks on errors.
+		. Pay only for the provisioned resources
+	- Terminology
+		. Template 
+			> A Cloudformation JSON or YAML defining multiple resources
+		. Stack
+			> A group of resources that are created from a Cloudformation template
+		. Changesets
+			> To make changes to stack, update the  template
+			> ChangeSets shows what would change if you execute
+			> Allows you to verify the changes and then execute
+		. Resources 
+			> What would you want to create [One and only mandatory stuff]
+		. Parameters
+			> Values to pass to your template at runtime
+		. Mappings
+			> Configure different values for different regions
+		. Outputs
+			> Returns value from execution
+		. Pseudo Parameters	
+			> Parameters defined by AWS CloudFormation	[AWS::AccountId, AWS::Region]
+		. Common Resource Attributes - Policies
+			> Creation Policy
+				` When is the creation of a resource complete
+				` How many instances in an ASG should be ready
+				` No of signals and wait time
+			> Deletion Policy
+				` Preserve or backup resource when stack is deleted [Retain Snapshot Delete]
+			> Depends On : One resource will be created only if other resource is created
+			> Update Policy 
+				` How should update be handled.
+		. Conditions
+			> Condition can be attached to a resource or output sections
+			> Based on the condition, resource or output is created
+		. Transform
+			> It specifies one or more MACROS that AWS Cloudformation uses to process your template
+				` AWS::Include 				- Inset boilerplate templates snippets to your templates
+				` AWS::Serverless 			- Converts SAM templates to CloudFormation
+				` AWS::CodeDeployBlueGreen 	- Enable blue green deployment through blue/green
+		. Intrinsic Funtions
+			> Built-in functions provided by AWS [Ref, GetAtt, FindInMap, Join]
+		. Execution Status
+			> CREATE_COMPLETE, CREATE_IN_PROGRESS, CREATE_FAILED, DELETE_COMPLETE, DELETE_FAILED, ROLLBACK_COMPLETE, ROLLBACK_FAILED, UPDATE_COMPLETE, UPDATE_COMPLETE_CLEAUP_IN_PROGRESS, UPDATE_FAILED
+		. Cross Stack Reference
+			> Create Modular CloudFormation Scripts
+			> Output of one stack can be imported in output of other stack
+			> Use Export output field and use Fn::ImportValue intrinsic function
+			> Output of one stack is created in another stack
+			> New resource is not created.
+		. Nested Stack
+			> Defining standard templates for different types of resouces
+			> It can be hierarchical.
+			> Resource is created
+			> Allows reuse of templates
+			
+* Serverless Application Model (SAM)
+	- Cloudformation for serverless
+	- Supported Resources
+		. Container Application
+		. Lambda function and layers
+		. API Gateways
+		. DynamoDB Tables
+		. Step Functions
+	- SAM Policy Templates
+	
+* More Serverless
+	- AWS Lambda - Event Source Mapping
+		. Some AWS Service don't invoke AWS Lambda directly [Events from DynamoDB, SQS , Kinesis]
+		. It is a lambda resource and is used to respond to events.
+		. S3 and SNS don't use Event source mapping
+	- AWS Lambda and Application Load Balancer
+	- AWS Lambda Permissions and resource based policies
+	- AWS Lambda Logging
+	- AWS Lambda inside a VPCs
+		. Ensure that the private subnet has a route to NAT Gateway.
+	- API Gateway - CORS COnfiguration
+		. Implement the receiver end to have access to these headers
+			> Access-Control-Allow-Methods
+			> Access-Control-Allow-Headers
+			> Access-Control-Allow-Origin
+	- API Gateway - Throttling
+	- API Gateway - Monitoring
+		. Cloudwatch metrices
+		. Cloudwatch logs
+		. CloudTrail
+		. X Ray
+	- AWS Step Functions
+		. Create a serverless workflow in 10 Minutes using a visual approach
+		. Output of one step flows as input into next step.
+		. Retry a step multiple times until it succeeds
+		. Maximum duration of 1 year
+
+* X-Ray
+	- Kibana for AWS
+	- Applications don't send details to X-Ray directly.
+		. Traces send to X-Ray daemon.
+		. X-Ray Daemon gathers raw data and sends batches to X-Ray
+	- Hierarchy
+		. Trace 		: Track the path of the request across applications and AWS Services
+		. Segment 		: All datapoints for a single component in the chain
+		. Sub-segment 	: Granular details about remote calls
+	
+* CloudTrail, Config and Cloudwatch
+	- AWS CloudTrail
+		. Track events, API Calls, changes made to your resources ?
+		. Who made the request ?
+		. What actions are performed ?
+		. What are the parameters used ?
+		. What was the end result ?
+		. Compliance with regulatory standards
+		. Troubleshooting, locate a missing resource.
+		. Can be of two types
+			> Single Region 
+			> Multi Region
+		. It tracks API Calls made on your AWS Account and provides detailed logs of these actions.
+	- AWS Config
+		. Auditing
+			> Complete inventory report of your AWS Resources
+		. Resource History and Change tracking
+		. Governance
+			> Customize config rules for specific resources or entire AWS Account
+		. Consistent rules and compliance across AWS Accounts.
+		. It continuously monitors and records the configuration changes to AWS Resources
+		. Predefined Config rules
+	- AWS Cloudwatch
+		. Monitoring and observability service
+		. Collects monitoring and operational data in the form of logs, metrices and events
+		. Set alarms, visualize logs, take automated actions and troubleshoot issues
+		. Cloudwatch metrices
+		. Cloudwatch logs
+		. Cloudwatch alarms
+		. Cloudwatch events
+	- EventBridge helps you react to custom events from your application but Cloudwatch events only react to predefined events.
+	
+* AWS CLI
+	- Logging In
+		. Access Keys are used for programmatic login:
+			> Command to use: aws configure
+			> Creates a credential file:
+			> Linux or macOS : ~/.aws/credentials
+			> Windows: C:\Users\USERNAME.aws\credentials
+		. A config file is also created with default region and output format
+			> (REMEMBER) DO NOT Use Access Keys on EC2 instances
+			> (BEST PRACTICE) Assign Roles to EC2 instances and use Instance Profiles.
+	- Profiles
+		. To handle multiple AWS Accounts
+	- Configuration Settings and Precedence
+		. Command line options
+		. Environment Variables
+		. CLI Credentials file
+		. CLI configuration file
+		. Container credentials
+		. Instance profile credentials
+	- Using IAM Role in the AWS CLI - On Premise
+		. Define a profile for the role in the ~/.aws/config file
+        . Create an IAM Role
+        . Using aws iam create-role passing --role-name and the role policy (--assume-role-policydocument)
+        . Or AWS Management Console
+		. CLI looks up the credentials for linked profile (your_user_profile) or credential_source (IAM role attached to the instance profile or the container)
+		. CLI uses the sts:AssumeRole operation
+		. IAM user/role should have access to AssumeRole operation
+		. Trust Policy associated with the IAM Role should allow IAM user to assume the role
+	- AWS Security Token Service
+		. Provide trusted users with security credentials to access your AWS Resources
+		. Token are temporary
+		. Supports both
+			> Web Identity Federation (OIDC)
+			> Corporate Identity Federation (SAML)
+	- AWS STS APIs
+		. AssumeRole
+		. AssumeRoleWithSAML
+		. AssumeRoleWithWebIdentity
+		. GetSessionToken
+		. DecodeAuthorizationMessage
+		. GetCallerIdentity
+
+* CORS Configuration
+	- Front end application running on can access resources from different origin.
+	- Backend should respond with headers
+		. Access-Control-Allow-Origin: http://www.in28minutes.com
+		. Access-Control-Allow-Methods: POST, GET, OPTIONS
+		. Access-Control-Allow-Headers: Authorization
+		. Using * is not recommended
+
+* Configuration Management
+	- To externalise configuration for the application. [Connecting database in different environments]
+
+* AWS System Manager Parameter Store
+	- Manage application configuration and secrets
+	- Supports hierarchical structure
+	- Maintains history of configuration over a period of time
+	- Integrates with 
+		. KMS
+		. EC2, ECS, Lambda
+		. AWS Secrets Manager
+		. Cloudformation, CodeBuild, CodeDeploy, CodePipeline
+
+* AWS Secrets Manager
+	- Service dedicated to secrets management
+	- Automatic rotation of secrets for compliance
+	
+* Caching
+	- Improve Application Performance
+	- Caching Strategies
+		. Lazy Loading or Cache Aside
+			> Application sees if data is found in cache
+			> If data is found, value from cache is used
+			> If data is not found, value is retrieved from database and added to cache
+		. Write Through
+			> Cache and database updated at the same time
+	- Amazon Elastic Cache
+		. Managed Service providing highly scalable and low latency in memory data store
+		. Used for distributed caching
+		. Options [Redis Memcached]
+	- Redis
+		. Highly Scalable and low latency in-memory data store
+		. can be used as a cache, database or message broker
+		. Automatic failover with multi AZ Deployment
+		. Supports backup and restore
+		. supports encryption
+	- Memcached
+		. Non persistent pure cache
+		. simple key-value storage
+		. can be used as a transient session store
+		. Limitations
+			> Backup and Restore not supported
+			> Doesn't support encryption and replication
+			> Doesn't support snapshots
+	- DAX is used for DynamoDB
+	
+* Architecture and Best Practices
+	- Helps Architect to build applications infrastructure
+		. Secure
+		. High Performing
+		. Resilient
+		. Efficient
+	- Five Pillars
+		. Operation Execellence
+		. Security
+		. Reliability
+		. Performance Efficiency
+		. Cost Optimization
+	- Operation Excellence
+		. Avoid/Minimize efforts and problems with 
+			> Provisioning Server
+			> Deployment
+			> Monitoring 
+			> Support
+	- Operation Execellence [Solutions]
+		. Use Managed Service
+		. Go Serverless
+		. Automate with Cloudformation
+		. Implement CI/CD to find problems early
+		. Perform frequent, small reversible changes
+		. Prepare for failure [Fire Drill]
+		. Gather metrices and analyse
+	- Security Pillar [IAM, Shield, WAF, KMS, HSM]
+		. Principle of least privilege for least time
+			> Use temporary credentials when possible
+			> Use IAM Groups to simplify IAM management
+			> Enforce strong password practices
+			> Enforce MFA
+			> Rotate password regularly
+		. Security in Depth
+			> VPCs and Private Subnet
+			> Use hardened AMIs
+			> Use Cloudfront with AWS Shield for DDoS mitigation
+			> Use WAF with cloudfront and ALB
+			> Use CloudFormation
+		. Protecting data at rest and in transit
+			> Enable Versioning and Encryption
+		. Detect Threats
+			> Activly monitor for security issues
+				` Monitor cloudwatch logs
+				` Use Amazon Guarduty to detect threats and continously monitor for malicious behaviour
+	- Reliability
+		. Automate recovery from failures
+		. Scale horizontaly
+		. Prefer serverless architecture
+		. Prefer loosley coupled architecture
+	- Performace Efficiency
+		. Choose the right solution
+	- Cos Optimization
+		. Choose the cost effective solution
