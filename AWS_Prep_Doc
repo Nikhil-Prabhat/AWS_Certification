@@ -182,6 +182,10 @@ SSE-C:
 		a subnet
 
 ## VPC Peering : Connect VPCs belonging to same or different AWS accounts irrespective of the region of the VPCs.
+
+## VPC Endpoint : A VPC Endpoint is a private connection between your Amazon Virtual Private Cloud (VPC) and certain AWS services, without using the public internet.
+	Without VPC Endpoints: If you want to access services like S3 or DynamoDB, your VPC resources (e.g., EC2 instances) would typically have to use the public internet. This could expose your data to potential threats and reduce control over security.
+	With VPC Endpoints: All communication happens inside AWS's private network, so it’s much more secure because it never leaves AWS. No public internet traffic is involved, which means there’s no exposure to outside risks.
 	
 ## Database Fundamentals
 	RPO - Recovery Point Objective : Maximum acceptable period of data loss - Durability
