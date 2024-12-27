@@ -433,6 +433,9 @@ Savings Plans 		Constant workloads that run all the time and you want more flexi
 	Can be spread across different AZs in same region
 	Maximum of seven partitions per Availability Zone per group
 
+An Elastic Network Interface (ENI) in AWS is a virtual network card (like a physical network card in a computer) that you can attach to an EC2 instance to enable it to communicate over a network. 
+ENIs provide networking functionality to EC2 instances and are a key part of managing network traffic within a Virtual Private Cloud (VPC).
+
 ## Block Storage
 	Use case: Hard-disks attached to your computers
 	Typically, ONE Block Storage device can be connected to ONE virtual server
