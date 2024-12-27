@@ -64,6 +64,8 @@
 		Maximum age of event (default - 6 hours) with exponential backoff
 		Retry attempts (default - 2)
 		Dead-letter queue service (default - none)
+	Reserved Concurrency : Concurrent no of lambda functions running at a time.
+	Provisioned Concurrency : Specified no of lambda functions always running to avoid cold start problem.
 		
 ## AWS Lambda Edge
 	Run Lambda functions to customize CloudFront contentccnn
@@ -272,6 +274,9 @@ For good performance, distribute items evenly across partitions. Prefer attribut
 	Disabling a stream, closes any open shards.
 
 ## SQS
+
+Visibility Timeout : Controls the time during which a message is invisible to other consumers after it has been picked up by one consumer.
+Delay Seconds      : Delays the delivery of a message to the queue for a certain amount of time after it is sent.
 
 Standard Queue
 	Unlimited throughput
