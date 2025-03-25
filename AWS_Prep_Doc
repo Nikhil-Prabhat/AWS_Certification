@@ -91,6 +91,10 @@
 	HTTP API
 		Newer, Simpler, Cheaper and Low Latency
 		Automatic Deployments
+
+	We can create multiple rest endpoints either using open api specifications or by manually selecting the server where our logic resides.
+	If we want to test our api gateway, we need to deploy to stages and then we get our api gateway url to be reused.
+	We can create multiple resources and deploy it to multiple stages as per our use to even support multiple environments.
 		
 ## API Gateway - Endpoint Types
 	Edge Optimized (default)
